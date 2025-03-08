@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+
+{% block title %}Welcome to Crowd Pulse - Live Polling & Survey Platform{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center text-center mb-5">
+        <div class="col-md-8">
+            <h1 class="display-4 mb-4">Welcome to Crowd Pulse</h1>
+            <p class="lead">Create and share live polls and surveys with real-time results.</p>
+            {% if user.is_authenticated %}
+            <a href="#" class="btn btn-primary btn-lg">Create New Survey</a>
+            {% else %}
+            <div class="mt-4">
+                <a href="#" class="btn btn-primary btn-lg me-2">Sign Up</a>
+                <a href="#" class="btn btn-outline-primary btn-lg">Learn More</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if recent_surveys %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2 class="text-center mb-4">Recent Public Surveys</h2>
+        </div>
+        {% for survey in recent_surveys %}
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">{{ survey.title }}</h5>
+                    <p class="card-text">{{ survey.description|truncatewords:20 }}</p>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted">Created by {{ survey.creator.username }}</small>
+                        <a href="#" class="btn btn-sm btn-primary">Take Survey</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            <div class="card text-center h-100">
+                <div class="card-body">
+                    <h3 class="card-title">Create</h3>
+                    <p class="card-text">Design custom surveys with multiple question types and real-time responses.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card text-center h-100">
+                <div class="card-body">
+                    <h3 class="card-title">Share</h3>
+                    <p class="card-text">Share your surveys easily via links, email, or embed them on your website.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card text-center h-100">
+                <div class="card-body">
+                    <h3 class="card-title">Analyze</h3>
+                    <p class="card-text">Get instant insights with real-time analytics and detailed response data.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
