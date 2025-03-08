@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Survey - Crowd Pulse{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-body p-4">
+                    <h2 class="text-center mb-4">Create New Survey</h2>
+
+                    {% if messages %}
+                    {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                    {% endfor %}
+                    {% endif %}
+
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="id_title" class="form-label">Title</label>
+                            <input type="text" name="title" class="form-control" id="id_title" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="id_description" class="form-label">Description</label>
+                            <textarea name="description" class="form-control" id="id_description" rows="3"></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="id_visibility" class="form-label">Visibility</label>
+                            <select name="visibility" class="form-select" id="id_visibility" required>
+                                <option value="public">Public</option>
+                                <option value="private">Private</option>
+                                <option value="password_protected">Password Protected</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3" id="password_field" style="display: none;">
+                            <label for="id_access_password" class="form-label">Access Password</label>
+                            <input type="password" name="access_password" class="form-control" id="id_access_password">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="id_start_date" class="form-label">Start Date (optional)</label>
+                            <input type="datetime-local" name="start_date" class="form-control" id="id_start_date">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="id_end_date" class="form-label">End Date (optional)</label>
+                            <input type="datetime-local" name="end_date" class="form-control" id="id_end_date">
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">Create Survey</button>
+                            <a href="{% url 'home' %}" class="btn btn-outline-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.getElementById('id_visibility').addEventListener('change', function () {
+        const passwordField = document.getElementById('password_field');
+        passwordField.style.display = this.value === 'password_protected' ? 'block' : 'none';
+        const passwordInput = document.getElementById('id_access_password');
+        passwordInput.required = this.value === 'password_protected';
+    });
+</script>
+{% endblock %}

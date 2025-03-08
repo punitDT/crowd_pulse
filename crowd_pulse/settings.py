@@ -35,16 +35,11 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'django.contrib.sites',
     
     # Third party apps
     'rest_framework',
     'corsheaders',
     'channels',
-    'allauth',
-    'allauth.account',
-    'allauth.socialaccount',
-    'allauth.socialaccount.providers.google',
     'drf_spectacular',
     
     # Local apps
@@ -61,7 +56,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'allauth.account.middleware.AccountMiddleware',  # Added AllAuth middleware
 ]
 
 ROOT_URLCONF = 'crowd_pulse.urls'
@@ -139,11 +133,15 @@ CORS_ALLOWED_ORIGINS = []  # Add your frontend URLs in production
 # Authentication settings
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
-    'allauth.account.auth_backends.AuthenticationBackend',
 ]
 
-SITE_ID = 1
-ACCOUNT_EMAIL_VERIFICATION = 'none'  # Change to 'mandatory' in production
-ACCOUNT_AUTHENTICATION_METHOD = 'email'
-ACCOUNT_EMAIL_REQUIRED = True
-ACCOUNT_UNIQUE_EMAIL = True
+# Email settings
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # Development only
+DEFAULT_FROM_EMAIL = 'noreply@crowdpulse.com'
+
+LOGIN_URL = 'login'
+LOGIN_REDIRECT_URL = 'home'
+LOGOUT_REDIRECT_URL = 'login'
+
+# Clear session on logout
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True  # Session expires when browser closes
