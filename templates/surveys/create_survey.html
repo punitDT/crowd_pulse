@@ -2,6 +2,65 @@
 
 {% block title %}Create Survey - Crowd Pulse{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<style>
+    .question-form {
+        border: none;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+    }
+
+    .question-form:hover {
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, .15);
+    }
+
+    .btn-add-question {
+        border-style: dashed;
+        padding: 0.75rem;
+        width: 100%;
+        margin: 1rem 0;
+    }
+
+    .question-number {
+        background: #007bff;
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 50%;
+        margin-right: 0.5rem;
+    }
+
+    .remove-question {
+        opacity: 0.7;
+        transition: all 0.3s ease;
+    }
+
+    .remove-question:hover {
+        opacity: 1;
+    }
+
+    .options-field {
+        display: none;
+    }
+
+    .card {
+        border-radius: 15px;
+    }
+
+    .form-section {
+        background: #f8f9fa;
+        padding: 1.5rem;
+        border-radius: 10px;
+        margin-bottom: 2rem;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="container py-5">
     <div class="row justify-content-center">
@@ -10,53 +69,123 @@
                 <div class="card-body p-4">
                     <h2 class="text-center mb-4">Create New Survey</h2>
 
-                    {% if messages %}
-                    {% for message in messages %}
-                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
-                        {{ message }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                    {% endfor %}
-                    {% endif %}
-
-                    <form method="post">
+                    <form method="post" data-ajax>
                         {% csrf_token %}
-                        <div class="mb-3">
-                            <label for="id_title" class="form-label">Title</label>
-                            <input type="text" name="title" class="form-control" id="id_title" required>
+
+                        <div class="form-section">
+                            <h4 class="mb-4"><i class="fas fa-clipboard-list"></i> Survey Details</h4>
+                            <div class="mb-3">
+                                <label for="id_title" class="form-label">Title</label>
+                                <input type="text" name="title" class="form-control" id="id_title" required
+                                    placeholder="Enter survey title">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="id_description" class="form-label">Description</label>
+                                <textarea name="description" class="form-control" id="id_description" rows="3"
+                                    placeholder="Describe your survey"></textarea>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="id_visibility" class="form-label">Visibility</label>
+                                    <select name="visibility" class="form-select" id="id_visibility" required>
+                                        <option value="public">Public</option>
+                                        <option value="private">Private</option>
+                                        <option value="password_protected">Password Protected</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-6 mb-3" id="password_field" style="display: none;">
+                                    <label for="id_access_password" class="form-label">Access Password</label>
+                                    <input type="password" name="access_password" class="form-control"
+                                        id="id_access_password" placeholder="Enter password">
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="id_start_date" class="form-label">Start Date</label>
+                                    <input type="datetime-local" name="start_date" class="form-control"
+                                        id="id_start_date">
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label for="id_end_date" class="form-label">End Date</label>
+                                    <input type="datetime-local" name="end_date" class="form-control" id="id_end_date">
+                                </div>
+                            </div>
                         </div>
 
-                        <div class="mb-3">
-                            <label for="id_description" class="form-label">Description</label>
-                            <textarea name="description" class="form-control" id="id_description" rows="3"></textarea>
-                        </div>
+                        <div class="form-section">
+                            <h4 class="mb-4"><i class="fas fa-questions"></i> Questions</h4>
+                            {{ question_formset.management_form }}
+                            <div id="question-forms">
+                                {% for question_form in question_formset %}
+                                <div class="card mb-3 question-form">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-center mb-3">
+                                            <h5 class="card-title mb-0">
+                                                <span class="question-number">{{ forloop.counter }}</span>
+                                                Question
+                                            </h5>
+                                            {% if question_formset.can_delete %}
+                                            <button type="button" class="btn btn-outline-danger btn-sm remove-question">
+                                                <i class="fas fa-times"></i> Remove
+                                            </button>
+                                            {% endif %}
+                                        </div>
 
-                        <div class="mb-3">
-                            <label for="id_visibility" class="form-label">Visibility</label>
-                            <select name="visibility" class="form-select" id="id_visibility" required>
-                                <option value="public">Public</option>
-                                <option value="private">Private</option>
-                                <option value="password_protected">Password Protected</option>
-                            </select>
-                        </div>
+                                        {{ question_form.id }}
+                                        <div class="mb-3">
+                                            <label class="form-label">Question Text</label>
+                                            <textarea name="{{ question_form.text.html_name }}" class="form-control"
+                                                rows="2" placeholder="Enter your question"></textarea>
+                                        </div>
 
-                        <div class="mb-3" id="password_field" style="display: none;">
-                            <label for="id_access_password" class="form-label">Access Password</label>
-                            <input type="password" name="access_password" class="form-control" id="id_access_password">
-                        </div>
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <label class="form-label">Question Type</label>
+                                                <select name="{{ question_form.question_type.html_name }}"
+                                                    class="form-select question-type">
+                                                    <option value="text">Text Answer</option>
+                                                    <option value="single_choice">Single Choice</option>
+                                                    <option value="multiple_choice">Multiple Choice</option>
+                                                    <option value="rating">Rating</option>
+                                                    <option value="yes_no">Yes/No</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label class="form-label">Question Order</label>
+                                                <input type="number" name="{{ question_form.order.html_name }}"
+                                                    class="form-control" value="{{ forloop.counter }}">
+                                            </div>
+                                        </div>
 
-                        <div class="mb-3">
-                            <label for="id_start_date" class="form-label">Start Date (optional)</label>
-                            <input type="datetime-local" name="start_date" class="form-control" id="id_start_date">
-                        </div>
+                                        <div class="mb-3 options-field">
+                                            <label class="form-label">Options</label>
+                                            <textarea name="{{ question_form.options.html_name }}" class="form-control"
+                                                rows="3" placeholder="Enter each option on a new line"></textarea>
+                                            <div class="form-text">Enter each option on a new line</div>
+                                        </div>
 
-                        <div class="mb-3">
-                            <label for="id_end_date" class="form-label">End Date (optional)</label>
-                            <input type="datetime-local" name="end_date" class="form-control" id="id_end_date">
+                                        <div class="form-check">
+                                            <input type="checkbox" name="{{ question_form.is_required.html_name }}"
+                                                class="form-check-input" checked>
+                                            <label class="form-check-label">Required question</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+
+                            <button type="button" class="btn btn-outline-primary btn-add-question" id="add-question">
+                                <i class="fas fa-plus"></i> Add Another Question
+                            </button>
                         </div>
 
                         <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-primary">Create Survey</button>
+                            <button type="submit" class="btn btn-primary btn-lg">Create Survey</button>
                             <a href="{% url 'home' %}" class="btn btn-outline-secondary">Cancel</a>
                         </div>
                     </form>
@@ -68,12 +197,146 @@
 {% endblock %}
 
 {% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
 <script>
+    // Handle visibility password field
     document.getElementById('id_visibility').addEventListener('change', function () {
         const passwordField = document.getElementById('password_field');
         passwordField.style.display = this.value === 'password_protected' ? 'block' : 'none';
         const passwordInput = document.getElementById('id_access_password');
         passwordInput.required = this.value === 'password_protected';
+    });
+
+    // Handle dynamic formset with error handling
+    document.addEventListener('DOMContentLoaded', function () {
+        const questionForms = document.getElementById('question-forms');
+        const addButton = document.getElementById('add-question');
+        const totalFormsInput = document.querySelector('[name="question_set-TOTAL_FORMS"]');
+
+        function validateForm() {
+            let isValid = true;
+            const errors = {};
+
+            // Validate survey details
+            const title = document.getElementById('id_title').value;
+            if (!title) {
+                errors.title = 'Title is required';
+                isValid = false;
+            }
+
+            // Validate questions
+            const questions = questionForms.getElementsByClassName('question-form');
+            if (questions.length === 0) {
+                errors.questions = 'At least one question is required';
+                isValid = false;
+            }
+
+            Array.from(questions).forEach((questionForm, index) => {
+                const text = questionForm.querySelector('textarea').value;
+                const type = questionForm.querySelector('select').value;
+                const options = questionForm.querySelector('.options-field textarea')?.value;
+
+                if (!text) {
+                    errors[`question_${index + 1}`] = 'Question text is required';
+                    isValid = false;
+                }
+
+                if (['single_choice', 'multiple_choice'].includes(type) && (!options || options.split('\n').filter(Boolean).length < 2)) {
+                    errors[`question_${index + 1}_options`] = 'At least two options are required for choice questions';
+                    isValid = false;
+                }
+            });
+
+            if (!isValid) {
+                handleFormErrors(errors);
+            }
+
+            return isValid;
+        }
+
+        // Add form validation before submission
+        document.querySelector('form[data-ajax]').addEventListener('submit', function (e) {
+            if (!validateForm()) {
+                e.preventDefault();
+            }
+        });
+
+        // Update existing dynamic formset code with error handling
+        function updateQuestionNumbers() {
+            questionForms.querySelectorAll('.question-number').forEach((num, index) => {
+                num.textContent = index + 1;
+            });
+        }
+
+        function toggleOptionsField(selectElement) {
+            const questionForm = selectElement.closest('.question-form');
+            const optionsField = questionForm.querySelector('.options-field');
+            const questionType = selectElement.value;
+
+            if (['single_choice', 'multiple_choice'].includes(questionType)) {
+                optionsField.style.display = 'block';
+                optionsField.querySelector('textarea').required = true;
+            } else {
+                optionsField.style.display = 'none';
+                optionsField.querySelector('textarea').required = false;
+            }
+        }
+
+        // Initialize and add event listeners
+        document.querySelectorAll('.question-type').forEach(select => {
+            toggleOptionsField(select);
+            select.addEventListener('change', function () {
+                toggleOptionsField(this);
+            });
+        });
+
+        addButton.addEventListener('click', function () {
+            const forms = questionForms.getElementsByClassName('question-form');
+            const formCount = forms.length;
+            const template = forms[0].cloneNode(true);
+
+            template.innerHTML = template.innerHTML.replaceAll(
+                /question_set-0/g,
+                `question_set-${formCount}`
+            );
+
+            template.querySelectorAll('input[type="text"], textarea').forEach(input => {
+                input.value = '';
+            });
+
+            template.querySelector('input[type="number"]').value = formCount + 1;
+
+            const typeSelect = template.querySelector('.question-type');
+            typeSelect.value = 'text';
+            typeSelect.addEventListener('change', function () {
+                toggleOptionsField(this);
+            });
+
+            questionForms.appendChild(template);
+            totalFormsInput.value = formCount + 1;
+            updateQuestionNumbers();
+            toggleOptionsField(typeSelect);
+
+            // Show success toast for new question
+            showToast('New question added successfully', 'success');
+        });
+
+        // Remove question form with confirmation
+        questionForms.addEventListener('click', function (e) {
+            if (e.target.classList.contains('remove-question')) {
+                const forms = questionForms.getElementsByClassName('question-form');
+                if (forms.length > 1) {
+                    if (confirm('Are you sure you want to remove this question?')) {
+                        e.target.closest('.question-form').remove();
+                        totalFormsInput.value = forms.length - 1;
+                        updateQuestionNumbers();
+                        showToast('Question removed successfully', 'info');
+                    }
+                } else {
+                    showToast('Cannot remove the last question', 'error');
+                }
+            }
+        });
     });
 </script>
 {% endblock %}

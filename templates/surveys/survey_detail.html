@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ survey.title }} - Crowd Pulse{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-body p-4">
+                    <h2 class="text-center mb-4">{{ survey.title }}</h2>
+                    <p class="text-muted text-center">{{ survey.description }}</p>
+
+                    {% if messages %}
+                    {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                    {% endfor %}
+                    {% endif %}
+
+                    <div class="survey-status mb-4">
+                        <div class="d-flex justify-content-center align-items-center gap-3">
+                            <span class="badge bg-{{ survey.is_active|yesno:'success,secondary' }}">
+                                {{ survey.is_active|yesno:'Active,Inactive' }}
+                            </span>
+                            {% if survey.start_date %}
+                            <span class="badge bg-info">
+                                Starts: {{ survey.start_date|date:"M d, Y H:i" }}
+                            </span>
+                            {% endif %}
+                            {% if survey.end_date %}
+                            <span class="badge bg-info">
+                                Ends: {{ survey.end_date|date:"M d, Y H:i" }}
+                            </span>
+                            {% endif %}
+                            <span class="badge bg-primary">{{ survey.visibility|title }}</span>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    {% if survey.is_active %}
+                    {% if survey.start_date and survey.start_date > now %}
+                    <div class="alert alert-info text-center">
+                        This survey will be available from {{ survey.start_date|date:"M d, Y H:i" }}
+                    </div>
+                    {% elif survey.end_date and survey.end_date < now %} <div class="alert alert-warning text-center">
+                        This survey ended on {{ survey.end_date|date:"M d, Y H:i" }}
+                </div>
+                {% else %}
+                <div class="text-center">
+                    <a href="{% url 'start_survey' survey.slug %}" class="btn btn-primary btn-lg">Start Survey</a>
+                </div>
+                {% endif %}
+                {% else %}
+                <div class="alert alert-secondary text-center">
+                    This survey is currently inactive.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if survey.creator == user or user.is_staff %}
+<div class="row justify-content-center mt-5">
+    <div class="col-md-8">
+        <div class="card shadow">
+            <div class="card-body">
+                <h3 class="text-center mb-4">Survey Responses</h3>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Respondent</th>
+                                <th>Submitted</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for response in survey.responses.all %}
+                            <tr>
+                                <td>{% if response.respondent %}{{ response.respondent.username }}{% else %}Anonymous{%
+                                    endif %}</td>
+                                <td>{{ response.completed_at|date:"M d, Y H:i" }}</td>
+                                <td>
+                                    <span class="badge bg-success">Completed</span>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="3" class="text-center">No responses yet</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .survey-status .badge {
+        font-size: 0.9rem;
+        padding: 0.5rem 1rem;
+    }
+
+    .table {
+        margin-bottom: 0;
+    }
+</style>
+{% endblock %}

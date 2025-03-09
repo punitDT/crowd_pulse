@@ -9,7 +9,7 @@
             <h1 class="display-4 mb-4">Welcome to Crowd Pulse</h1>
             <p class="lead">Create and share live polls and surveys with real-time results.</p>
             {% if user.is_authenticated %}
-            <a href="#" class="btn btn-primary btn-lg">Create New Survey</a>
+            <a href="{% url 'create_survey' %}" class="btn btn-primary btn-lg">Create New Survey</a>
             {% else %}
             <div class="mt-4">
                 <a href="#" class="btn btn-primary btn-lg me-2">Sign Up</a>
@@ -32,7 +32,7 @@
                     <p class="card-text">{{ survey.description|truncatewords:20 }}</p>
                     <div class="d-flex justify-content-between align-items-center">
                         <small class="text-muted">Created by {{ survey.creator.username }}</small>
-                        <a href="#" class="btn btn-sm btn-primary">Take Survey</a>
+                        <a href="{% url 'survey_detail' survey.slug %}" class="btn btn-sm btn-primary">View Details</a>
                     </div>
                 </div>
             </div>
